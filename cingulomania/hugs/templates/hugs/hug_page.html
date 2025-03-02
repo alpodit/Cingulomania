@@ -1,0 +1,168 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cingulomania - Send a Hug</title>
+
+    <link rel="icon" href="{% static 'favicon.png' %}" type="image/">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #fff5f8;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            text-align: center;
+            margin-top: 20px;
+            color: #ff5e78;
+            font-size: 4rem;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .bubble-button {
+            background-color: #ff5e78;
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            transition: background-color 0.3s ease;
+        }
+
+        .bubble-button:hover {
+            background-color: #ff2a50;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ff5e78;
+            border-radius: 50%;
+            animation: particle-move 0.8s ease-out forwards;
+        }
+
+        @keyframes particle-move {
+            from {
+                transform: translate(0, 0);
+            }
+            to {
+                transform: translate(var(--x), var(--y));
+                opacity: 0;
+            }
+        }
+
+        /* Style for messages */
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        ul li {
+            background-color: #ffd6e0;
+            padding: 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            display: inline-block;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+            color: #ff5e78;
+            font-size: 1.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Cingulomania</h1>
+
+    <form method="post" action="{% url 'logout' %}" class="d-flex justify-content-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger">Logout</button>
+    </form>
+    
+    <!-- Display any success message -->
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% for user in users %}
+        <form method="post" action="{% url 'send_hug' user.id %}">
+            {% csrf_token %}
+            <div class="container">
+                <button class="bubble-button" id="bubble-btn" type="submit">Send a hug to {{ user.username }} ^-^</button>
+            </div>
+        </form>
+    {% endfor %}
+
+    {% if last_received_hug %}
+        <h2>Last received hug: {{ last_received_hug }}</h2>
+    {% endif %}
+
+    <script>
+        const buttons = document.querySelectorAll('.bubble-button');
+    
+        buttons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                createFireworks(e.clientX, e.clientY);
+            });
+        });
+    
+        function createFireworks(x, y) {
+            const numParticles = 30;
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+    
+                const angle = Math.random() * 2 * Math.PI;
+                const radius = Math.random() * 100 + 50; 
+                const xMove = Math.cos(angle) * radius;
+                const yMove = Math.sin(angle) * radius;
+    
+                particle.style.setProperty('--x', `${xMove}px`);
+                particle.style.setProperty('--y', `${yMove}px`);
+    
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+    
+                document.body.appendChild(particle);
+    
+                setTimeout(() => {
+                    particle.remove();
+                }, 800);
+            }
+        }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
